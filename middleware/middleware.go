@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -31,12 +32,19 @@ func CreateToken(user model.User) (string, error) {
 }
 
 func AuthMiddleware(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
+	// authHeader := c.Get("Authorization")
+	cookie := c.Cookies("jwt")
+
+	fmt.Println("cookie", cookie)
+	if cookie == "" {
 		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
 	}
-	tokenString := authHeader[len("Bearer "):]
-	_, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// if authHeader == "" {
+	// 	return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
+	// }
+	//tokenString := cookie[len(""):]
+	//fmt.Println("token String", tokenString)
+	_, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 	if err != nil {

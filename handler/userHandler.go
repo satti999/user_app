@@ -128,6 +128,13 @@ func (uh *UserHandler) GetUserByEmail(c *fiber.Ctx) error {
 
 	email := c.Params("email")
 
+	if email == "" {
+
+		return c.Status(http.StatusBadRequest).JSON(
+			&fiber.Map{"status": "error", "message": "Email is required", "data": nil})
+	}
+	fmt.Println("email", email)
+
 	user, err := uh.urepo.GetUserByEmail(email)
 
 	if err != nil {
@@ -171,6 +178,11 @@ func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 
 	}
+	if user.Password != "" {
+		pass := utils.HashAndSalt(user.Password)
+
+		user.Password = pass
+	}
 
 	err = uh.urepo.UpdateUser(user, user_ID)
 
@@ -182,7 +194,7 @@ func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	}
 	user.ID = user_ID
 
-	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User updated", "data": user})
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User updated"})
 
 }
 

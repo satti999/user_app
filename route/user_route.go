@@ -21,7 +21,7 @@ func (ur *UserRoute) UserRoute(app *fiber.App) {
 	app.Post("/login", ur.userHandler.LoginHandler)
 	app.Use(middleware.AuthMiddleware)
 	app.Get("/user/:id", ur.userHandler.GetUserByID)
-	app.Get("/user/email/:email", ur.userHandler.GetUserByEmail)
+	app.Get("/user/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
 	app.Get("/users", ur.userHandler.GetAllUsers)
 	app.Put("/user/:id", ur.userHandler.UpdateUser)
 	app.Delete("/user/:id", ur.userHandler.DeleteUser)
