@@ -62,10 +62,6 @@ A simple user app demostrating the CRUD operation of user using fiber gorm and p
 | :-------- | :------- | :---------------------------------------- |
 | `id`      | `DELETE` | It delete the user record base on user Id |
 
-## Screenshots
-
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
-
 ## Run Locally
 
 Clone the project
