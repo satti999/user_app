@@ -7,10 +7,10 @@ import (
 )
 
 type UserRoute struct {
-	userHandler *handler.UserHandler
+	userHandler handler.UserHandlerInterface
 }
 
-func NewUserRoute(userHandler *handler.UserHandler) *UserRoute {
+func NewUserRoute(userHandler handler.UserHandlerInterface) *UserRoute {
 	return &UserRoute{
 		userHandler: userHandler,
 	}
@@ -19,7 +19,7 @@ func NewUserRoute(userHandler *handler.UserHandler) *UserRoute {
 func (ur *UserRoute) UserRoute(app *fiber.App) {
 	app.Post("/user", ur.userHandler.CreateUser)
 	app.Post("/login", ur.userHandler.LoginHandler)
-	app.Use(middleware.AuthMiddleware)
+	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
 	app.Get("/user/:id", ur.userHandler.GetUserByID)
 	app.Get("/user/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
 	app.Get("/users", ur.userHandler.GetAllUsers)

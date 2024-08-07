@@ -11,7 +11,7 @@ import (
 	"github.com/user_app/model"
 )
 
-// var secretKey = []byte("secret-key")
+var AdminRole = "admin"
 
 func CreateToken(user model.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
@@ -20,7 +20,7 @@ func CreateToken(user model.User) (string, error) {
 			"id":       user.ID,
 			"email":    user.Email,
 			"role":     user.Role,
-			"exp":      time.Now().Add(time.Hour * 24).Unix(),
+			"exp":      time.Now().Add(time.Minute * 1).Unix(),
 		})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
@@ -32,10 +32,7 @@ func CreateToken(user model.User) (string, error) {
 }
 
 func AuthMiddleware(c *fiber.Ctx) error {
-	// authHeader := c.Get("Authorization")
 	cookie := c.Cookies("jwt")
-
-	fmt.Println("cookie", cookie)
 	if cookie == "" {
 		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
 	}
@@ -51,5 +48,34 @@ func AuthMiddleware(c *fiber.Ctx) error {
 		return err
 	}
 
+	return c.Next()
+}
+
+func AdminMiddleware(c *fiber.Ctx) error {
+
+	// var userRole string
+	cookie := c.Cookies("jwt")
+
+	if cookie == "" {
+		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token "})
+
+	}
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(cookie, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	userRole, ok := claims["role"].(string)
+	if !ok {
+		panic("Couldn't parse email as string")
+	}
+	fmt.Println(userRole)
+
+	if userRole != "admin" {
+		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "Access denied as only admin allowed"})
+	}
 	return c.Next()
 }

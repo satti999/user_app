@@ -4,19 +4,27 @@ import (
 	"gorm.io/gorm"
 )
 
+type UseerRole string
+
 const (
-	RoleAdmin = "admin"
-	RoleUser  = "user"
+	AdminRole UseerRole = "admin"
+	UserRole  UseerRole = "user"
+	GuestRole UseerRole = "guest"
 )
 
 type User struct {
 	gorm.Model
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+	Name string `json:"name"`
+	Role UseerRole
+	// RoleID   uint   `gorm:"index" json:"role_id"`
+	Email string `json:"email"`
+	// Role     Role   `gorm:"foreignKey:RoleID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Password string `json:"password"`
 }
 
-func isAdmin(user User) bool {
-	return user.Role == RoleAdmin
-}
+// type Role struct {
+// 	gorm.Model
+// 	ID          uint   `gorm:"primary_key"`
+// 	Name        string `gorm:"size:50;not null;unique" json:"name"`
+// 	Description string `gorm:"size:255;not null" json:"description"`
+// }

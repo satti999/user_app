@@ -13,11 +13,22 @@ import (
 	"github.com/user_app/utils"
 )
 
+type UserHandlerInterface interface {
+	CreateUser(c *fiber.Ctx) error
+	LoginHandler(c *fiber.Ctx) error
+	GetUserByID(c *fiber.Ctx) error
+	UpdateUser(c *fiber.Ctx) error
+	DeleteUser(c *fiber.Ctx) error
+	GetAllUsers(c *fiber.Ctx) error
+	GetUserByRole(c *fiber.Ctx) error
+	GetUserByEmail(c *fiber.Ctx) error
+}
+
 type UserHandler struct {
 	urepo *repository.UserRepository
 }
 
-func NewUserHandler(useRrepo *repository.UserRepository) *UserHandler {
+func NewUserHandler(useRrepo *repository.UserRepository) UserHandlerInterface {
 	return &UserHandler{
 		urepo: useRrepo,
 	}

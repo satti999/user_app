@@ -14,6 +14,10 @@ func NewUserRepository(userrepo *Reposiotry) *UserRepository {
 	}
 }
 func (ur *UserRepository) CreateUser(user model.User) error {
+	// role := model.Role{
+	// 	Name:        "User",
+	// 	Description: "User access",
+	// }
 	//if user already exists then don't create the user
 
 	// _, err := ur.GetUserByEmail(user.Email)
@@ -21,6 +25,12 @@ func (ur *UserRepository) CreateUser(user model.User) error {
 	// 	return fmt.Errorf("user already exists")
 	// }
 	// fmt.Println("user already exists", user)
+	// err := ur.UserRepo.DB.Create(&role).Error
+	// if err != nil {
+	// 	return err
+	// }
+
+	// user.RoleID = role.ID
 	err := ur.UserRepo.DB.Create(&user).Error
 	if err != nil {
 		return err
