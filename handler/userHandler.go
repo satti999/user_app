@@ -1,16 +1,25 @@
 package handler
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/user_app/config"
 	"github.com/user_app/middleware"
 	"github.com/user_app/model"
 	"github.com/user_app/repository"
 	"github.com/user_app/utils"
+)
+
+const (
+	oauthGoogleUserInfoURL = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
+	// oauthGithubUserURL       = "https://api.github.com/user"
+	// oauthGithubUserEmailsURL = "https://api.github.com/user/emails"
 )
 
 type UserHandlerInterface interface {
@@ -22,6 +31,8 @@ type UserHandlerInterface interface {
 	GetAllUsers(c *fiber.Ctx) error
 	GetUserByRole(c *fiber.Ctx) error
 	GetUserByEmail(c *fiber.Ctx) error
+	GoogleSignin(c *fiber.Ctx) error
+	GoogleCallback(c *fiber.Ctx) error
 }
 
 type UserHandler struct {
@@ -247,5 +258,89 @@ func (uh *UserHandler) GetUserByRole(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Users found", "data": users})
+
+}
+
+func (uh *UserHandler) GoogleSignin(c *fiber.Ctx) error {
+
+	googleOAuthConfig := config.AppConfig.GoogleLoginConfig
+	url := googleOAuthConfig.AuthCodeURL("randomstate")
+
+	c.Status(fiber.StatusSeeOther)
+	c.Redirect(url)
+	return c.JSON(url)
+
+}
+
+func (uh *UserHandler) GoogleCallback(c *fiber.Ctx) error {
+
+	code := c.Query("code")
+
+	googleOAuthConfig := config.AppConfig.GoogleLoginConfig
+
+	token, err := googleOAuthConfig.Exchange(context.Background(), code)
+
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{"status": "error", "message": "Failed to login", "data": err})
+
+	}
+
+	response, err := http.Get(oauthGoogleUserInfoURL + token.AccessToken)
+
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{"status": "error", "message": "Failed to login", "data": err})
+
+	}
+	defer response.Body.Close()
+	var userInfo map[string]interface{}
+	err = json.NewDecoder(response.Body).Decode(&userInfo)
+
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{"status": "error", "message": "Failed to login", "data": err})
+
+	}
+	fmt.Println("User info", userInfo)
+	email := userInfo["email"].(string)
+
+	user, err := uh.urepo.GetUserByEmail(email)
+
+	if err != nil || user.Email == "" {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{"status": "error", "message": "Please sign up first", "data": err})
+
+	} else {
+
+		userToken, erre := middleware.CreateToken(user)
+
+		if erre != nil {
+
+			return c.Status(fiber.StatusInternalServerError).JSON(
+				&fiber.Map{"status": "error", "message": "Failed to login", "data": err})
+
+		}
+		cookie := fiber.Cookie{
+			Name:     "jwt",
+			Value:    userToken,
+			Expires:  time.Now().Add(time.Hour * 24),
+			HTTPOnly: true,
+		}
+
+		c.Cookie(&cookie)
+
+		return c.JSON(fiber.Map{"status": "success",
+			"message": "User logged in",
+			"data":    userToken,
+			"userId":  user.ID,
+			"role":    user.Role,
+			"email":   user.Email})
+
+	}
 
 }

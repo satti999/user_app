@@ -19,6 +19,8 @@ func NewUserRoute(userHandler handler.UserHandlerInterface) *UserRoute {
 func (ur *UserRoute) UserRoute(app *fiber.App) {
 	app.Post("/user", ur.userHandler.CreateUser)
 	app.Post("/login", ur.userHandler.LoginHandler)
+	app.Get("/google_login", ur.userHandler.GoogleSignin)
+	app.Get("/oauth/google/callback", ur.userHandler.GoogleCallback)
 	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
 	app.Get("/user/:id", ur.userHandler.GetUserByID)
 	app.Get("/user/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)

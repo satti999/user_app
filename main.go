@@ -7,12 +7,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	"github.com/user_app/config"
 	database "github.com/user_app/database"
 	"github.com/user_app/route"
 )
 
 func main() {
 	app := fiber.New()
+	config.GoogleConfig()
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
