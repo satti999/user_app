@@ -48,8 +48,10 @@ func NewUserHandler(useRrepo *repository.UserRepository) UserHandlerInterface {
 func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 	User := model.User{}
+	Profile := model.Profile{}
+	UserReq := model.UserReq{}
 
-	err := c.BodyParser(&User)
+	err := c.BodyParser(&UserReq)
 	fmt.Println("user", User.Name)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
@@ -62,22 +64,30 @@ func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"message": "User already exists"})
 	}
+	User.Name = UserReq.Name
+	User.Email = UserReq.Email
+	User.Role = UserReq.Role
+	User.Password = UserReq.Password
+	Profile.UserEmail = UserReq.Email
+	Profile.Bio = UserReq.Bio
+	Profile.Skills = UserReq.Skills
+	Profile.Resume = UserReq.Resume
+	Profile.ResumeOriginalName = UserReq.ResumeOriginalName
+	Profile.ProfilePhoto = UserReq.ProfilePhoto
 	pass := User.Password
 	hashedPass := utils.HashAndSalt(pass)
 	User.Password = hashedPass
 
-	err = uh.urepo.CreateUser(User)
+	err = uh.urepo.CreateUser(User, Profile)
 
 	if err != nil {
-		c.Status(http.StatusBadRequest).JSON(
+		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"message": "Error on creating user"})
-		return err
 
 	}
 
-	c.Status(http.StatusOK).JSON(&fiber.Map{
+	return c.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User has been created successfully"})
-	return nil
 
 }
 func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
@@ -87,9 +97,9 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 	err := c.BodyParser(&u)
 
 	if err != nil {
-		c.Status(http.StatusBadRequest).JSON(
+		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"message": "Error on login request"})
-		return err
+
 	}
 
 	user, err := uh.urepo.GetUserByEmail(u.Email)
@@ -169,7 +179,7 @@ func (uh *UserHandler) GetUserByEmail(c *fiber.Ctx) error {
 }
 
 func (uh *UserHandler) GetAllUsers(c *fiber.Ctx) error {
-
+	UserRes := model.UserResponse{}
 	users, err := uh.urepo.GetAllUsers()
 
 	if err != nil {
@@ -177,36 +187,57 @@ func (uh *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"status": "error", "message": "Error on getting users", "data": err})
 	}
+	UserRes.Name = users[0].Name
+	UserRes.Email = users[0].Email
+	UserRes.Role = users[0].Role
+	UserRes.Bio = users[0].Profile.Bio
+	UserRes.Skills = users[0].Profile.Skills
+	UserRes.Resume = users[0].Profile.Resume
+	UserRes.ResumeOriginalName = users[0].Profile.ResumeOriginalName
+	UserRes.ProfilePhoto = users[0].Profile.ProfilePhoto
 
-	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Users found", "data": users})
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Users found", "profile": UserRes})
 
 }
 
 func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	ide := c.Params("id")
-
+	User := model.User{}
+	Profile := model.Profile{}
+	UserReq := model.UserReq{}
 	userID, err := strconv.Atoi(ide)
 
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": err})
 	}
-	var user model.User
 
 	user_ID := uint(userID)
 
-	if err := c.BodyParser(&user); err != nil {
+	if err := c.BodyParser(&UserReq); err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 
 	}
-	if user.Password != "" {
-		pass := utils.HashAndSalt(user.Password)
+	fmt.Println("User skills are", UserReq.Skills)
+	fmt.Printf("%T\n", UserReq.Skills)
+	User.Name = UserReq.Name
+	User.Email = UserReq.Email
+	User.Password = UserReq.Password
+	Profile.Bio = UserReq.Bio
+	Profile.Skills = UserReq.Skills
+	Profile.Resume = UserReq.Resume
+	Profile.UserID = user_ID
+	Profile.ResumeOriginalName = UserReq.ResumeOriginalName
+	Profile.ProfilePhoto = UserReq.ProfilePhoto
 
-		user.Password = pass
+	if User.Password != "" {
+		pass := utils.HashAndSalt(User.Password)
+
+		User.Password = pass
 	}
 
-	err = uh.urepo.UpdateUser(user, user_ID)
+	err = uh.urepo.UpdateUser(User, Profile, user_ID)
 
 	if err != nil {
 
@@ -214,7 +245,7 @@ func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Error on updating user", "data": err})
 
 	}
-	user.ID = user_ID
+	User.ID = user_ID
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User updated"})
 
@@ -268,7 +299,7 @@ func (uh *UserHandler) GoogleSignin(c *fiber.Ctx) error {
 
 	c.Status(fiber.StatusSeeOther)
 	c.Redirect(url)
-	return c.JSON(url)
+	return nil
 
 }
 
@@ -335,7 +366,7 @@ func (uh *UserHandler) GoogleCallback(c *fiber.Ctx) error {
 		c.Cookie(&cookie)
 
 		return c.JSON(fiber.Map{"status": "success",
-			"message": "User logged in",
+			"message": "User logged in successfully",
 			"data":    userToken,
 			"userId":  user.ID,
 			"role":    user.Role,

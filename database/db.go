@@ -34,7 +34,11 @@ func ConnectDB(config *Config) *gorm.DB {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.User{},
+		&model.Profile{},
+		&model.Company{},
+		&model.Application{},
+		&model.Job{})
 	fmt.Println("Database migrated successfully")
 
 }

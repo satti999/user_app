@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/user_app/config"
 	database "github.com/user_app/database"
@@ -14,6 +15,7 @@ import (
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New())
 	config.GoogleConfig()
 	err := godotenv.Load(".env")
 	if err != nil {
