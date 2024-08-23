@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/user_app/model"
 )
 
@@ -13,26 +15,13 @@ func NewUserRepository(userrepo *Reposiotry) *UserRepository {
 		UserRepo: userrepo,
 	}
 }
-func (ur *UserRepository) CreateUser(user model.User) error {
-	// role := model.Role{
-	// 	Name:        "User",
-	// 	Description: "User access",
-	// }
-	//if user already exists then don't create the user
-
-	// _, err := ur.GetUserByEmail(user.Email)
-	// if err nil {
-	// 	return fmt.Errorf("user already exists")
-	// }
-	// fmt.Println("user already exists", user)
-	// err := ur.UserRepo.DB.Create(&role).Error
-	// if err != nil {
-	// 	return err
-	// }
-
-	// user.RoleID = role.ID
+func (ur *UserRepository) CreateUser(user model.User, profile model.Profile) error {
 	err := ur.UserRepo.DB.Create(&user).Error
-	if err != nil {
+	fmt.Println("User id in repo", user.ID)
+	user_res, _ := ur.GetUserByEmail(user.Email)
+	profile.UserID = user_res.ID
+	perr := ur.UserRepo.DB.Create(&profile).Error
+	if err != nil || perr != nil {
 		return err
 	}
 	return nil
@@ -40,7 +29,7 @@ func (ur *UserRepository) CreateUser(user model.User) error {
 
 func (ur *UserRepository) GetUserByID(id uint) (model.User, error) {
 	var user model.User
-	err := ur.UserRepo.DB.Model(user).Find(&user, id)
+	err := ur.UserRepo.DB.Model(user).Preload("Profile").Find(&user, id)
 	if err.Error != nil {
 		return user, err.Error
 	}
@@ -62,7 +51,7 @@ func (ur *UserRepository) UserExists(email string) bool {
 
 func (ur *UserRepository) GetUserByEmail(email string) (model.User, error) {
 	var user model.User
-	err := ur.UserRepo.DB.Model(user).Where("email = ?", email).Find(&user)
+	err := ur.UserRepo.DB.Model(user).Preload("Profile").Where("email = ?", email).Find(&user)
 	if err.Error != nil {
 		return user, err.Error
 	}
@@ -71,18 +60,23 @@ func (ur *UserRepository) GetUserByEmail(email string) (model.User, error) {
 
 func (ur *UserRepository) GetAllUsers() ([]model.User, error) {
 	var users []model.User
-	err := ur.UserRepo.DB.Model(model.User{}).Find(&users)
+
+	err := ur.UserRepo.DB.Model(model.User{}).Preload("Profile").Find(&users)
 	if err.Error != nil {
 		return users, err.Error
 	}
 	return users, nil
 }
 
-func (ur *UserRepository) UpdateUser(user model.User, id uint) error {
+func (ur *UserRepository) UpdateUser(user model.User, profile model.Profile, id uint) error {
 	User := model.User{}
 	user.ID = id
+	Profile := model.Profile{}
+
 	err := ur.UserRepo.DB.Model(User).Where("id = ?", id).Updates(user).Error
-	if err != nil {
+	perr := ur.UserRepo.DB.Model(Profile).Where("user_id", id).Updates(profile).Error
+
+	if err != nil || perr != nil {
 		return err
 	}
 	return nil

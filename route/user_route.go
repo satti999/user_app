@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/user_app/handler"
 	"github.com/user_app/middleware"
+	"github.com/user_app/utils"
 )
 
 type UserRoute struct {
@@ -16,14 +17,16 @@ func NewUserRoute(userHandler handler.UserHandlerInterface) *UserRoute {
 	}
 }
 
-func (ur *UserRoute) UserRoute(app *fiber.App) {
-	app.Post("/user", ur.userHandler.CreateUser)
-	app.Post("/login", ur.userHandler.LoginHandler)
+func (ur *UserRoute) UserRoute(router fiber.Router, app *fiber.App) {
+	router.Post("/create", utils.UpdateUserProfile, ur.userHandler.CreateUser)
+	router.Post("/login", ur.userHandler.LoginHandler)
+	router.Get("/google_login", ur.userHandler.GoogleSignin)
+	router.Get("/oauth/google/callback", ur.userHandler.GoogleCallback)
 	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
-	app.Get("/user/:id", ur.userHandler.GetUserByID)
-	app.Get("/user/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
-	app.Get("/users", ur.userHandler.GetAllUsers)
-	app.Put("/user/:id", ur.userHandler.UpdateUser)
-	app.Delete("/user/:id", ur.userHandler.DeleteUser)
-	app.Get("/user/role/:role", ur.userHandler.GetUserByRole)
+	router.Get("/get/:id", ur.userHandler.GetUserByID)
+	router.Get("/get/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
+	router.Get("/get", ur.userHandler.GetAllUsers)
+	router.Put("/update/:id", utils.UpdateUserProfile, ur.userHandler.UpdateUser)
+	router.Delete("/delete/:id", ur.userHandler.DeleteUser)
+	router.Get("/role/:role", ur.userHandler.GetUserByRole)
 }
