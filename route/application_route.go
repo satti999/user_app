@@ -1,6 +1,8 @@
 package route
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/user_app/handler"
 	"github.com/user_app/middleware"
@@ -20,6 +22,7 @@ func NewApplicationRoute(applicationHandler *handler.ApplicationHandler) *Applic
 func (ar *ApplicationRoute) Job_Application_Routerouter(router fiber.Router, app *fiber.App) {
 
 	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
+	fmt.Println("some change")
 
 	router.Post("/create", ar.applicationHandler.ApplyForJob)
 
