@@ -11,7 +11,12 @@ require (
 	gorm.io/gorm v1.25.11
 )
 
-require cloud.google.com/go/compute/metadata v0.3.0 // indirect
+require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	github.com/cloudinary/cloudinary-go/v2 v2.9.0 // indirect
+	github.com/creasty/defaults v1.7.0 // indirect
+	github.com/gorilla/schema v1.4.1 // indirect
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect

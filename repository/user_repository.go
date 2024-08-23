@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/user_app/model"
 )
 
@@ -15,6 +17,7 @@ func NewUserRepository(userrepo *Reposiotry) *UserRepository {
 }
 func (ur *UserRepository) CreateUser(user model.User, profile model.Profile) error {
 	err := ur.UserRepo.DB.Create(&user).Error
+	fmt.Println("User id in repo", user.ID)
 	user_res, _ := ur.GetUserByEmail(user.Email)
 	profile.UserID = user_res.ID
 	perr := ur.UserRepo.DB.Create(&profile).Error

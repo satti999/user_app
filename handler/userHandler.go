@@ -46,7 +46,7 @@ func NewUserHandler(useRrepo *repository.UserRepository) UserHandlerInterface {
 }
 
 func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
-
+	imagUrl := utils.GetProfileUrl()
 	User := model.User{}
 	Profile := model.Profile{}
 	UserReq := model.UserReq{}
@@ -73,7 +73,7 @@ func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
 	Profile.Skills = UserReq.Skills
 	Profile.Resume = UserReq.Resume
 	Profile.ResumeOriginalName = UserReq.ResumeOriginalName
-	Profile.ProfilePhoto = UserReq.ProfilePhoto
+	Profile.ProfilePhoto = imagUrl
 	pass := User.Password
 	hashedPass := utils.HashAndSalt(pass)
 	User.Password = hashedPass
@@ -201,7 +201,10 @@ func (uh *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 }
 
 func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
+
 	ide := c.Params("id")
+	imagUrl := utils.GetProfileUrl()
+	resumeUrl := utils.GetResumeUrl()
 	User := model.User{}
 	Profile := model.Profile{}
 	UserReq := model.UserReq{}
@@ -226,10 +229,10 @@ func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	User.Password = UserReq.Password
 	Profile.Bio = UserReq.Bio
 	Profile.Skills = UserReq.Skills
-	Profile.Resume = UserReq.Resume
+	Profile.Resume = resumeUrl
 	Profile.UserID = user_ID
 	Profile.ResumeOriginalName = UserReq.ResumeOriginalName
-	Profile.ProfilePhoto = UserReq.ProfilePhoto
+	Profile.ProfilePhoto = imagUrl
 
 	if User.Password != "" {
 		pass := utils.HashAndSalt(User.Password)

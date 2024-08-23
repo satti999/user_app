@@ -17,7 +17,7 @@ func CreateToken(user model.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"username": user.Name,
-			"id":       user.ID,
+			"userID":   user.ID,
 			"email":    user.Email,
 			"role":     user.Role,
 			"exp":      time.Now().Add(time.Minute * 30).Unix(),
@@ -64,18 +64,36 @@ func AdminMiddleware(c *fiber.Ctx) error {
 	_, err := jwt.ParseWithClaims(cookie, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
+
 	if err != nil {
 		return err
 	}
 
+	// var userID float64
+	// for key, value := range claims {
+	// 	if key == "userID" {
+	// 		userID = value.(float64)
+	// 	}
+	// 	fmt.Printf("%s: %v\n", key, value)
+
+	// }
+	userID, uok := claims["userID"].(float64)
+	if !uok {
+		fmt.Println("Couldn't parse id as int", uok)
+	}
 	userRole, ok := claims["role"].(string)
 	if !ok {
-		panic("Couldn't parse email as string")
+
+		fmt.Println("Couldn't parse email as string", ok)
 	}
+
 	fmt.Println(userRole)
+	fmt.Println(userID)
 
 	if userRole != "admin" {
 		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "Access denied as only admin allowed"})
 	}
+
+	c.Locals("userID", uint(userID))
 	return c.Next()
 }
