@@ -26,7 +26,7 @@ func (ur *UserRoute) UserRoute(router fiber.Router, app *fiber.App) {
 	router.Get("/get/:id", ur.userHandler.GetUserByID)
 	router.Get("/get/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
 	router.Get("/get", ur.userHandler.GetAllUsers)
-	router.Put("/get/:id", utils.UpdateUserProfile, ur.userHandler.UpdateUser)
+	router.Put("/update/:id", utils.UpdateUserProfile, ur.userHandler.UpdateUser)
 	router.Delete("/delete/:id", ur.userHandler.DeleteUser)
 	router.Get("/role/:role", ur.userHandler.GetUserByRole)
 }
