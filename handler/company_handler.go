@@ -70,7 +70,7 @@ func (ch *CompanyHandler) CreateCompany(c *fiber.Ctx) error {
 
 func (ch *CompanyHandler) GetCompanyByID(c *fiber.Ctx) error {
 
-	id, err := c.ParamsInt("userID")
+	id, err := c.ParamsInt("id")
 
 	if err != nil {
 
@@ -119,6 +119,14 @@ func (ch *CompanyHandler) UpdateCompany(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Id is invalid", "data": err})
 
 	}
+	ide := c.Locals("userID")
+	userID, ok := ide.(uint)
+	if !ok {
+		// Handle the error case when the type assertion fails
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get user ID",
+		})
+	}
 
 	var company model.Company
 
@@ -130,6 +138,7 @@ func (ch *CompanyHandler) UpdateCompany(c *fiber.Ctx) error {
 	}
 
 	company.Logo = imagUrl
+	company.UserID = userID
 
 	err = ch.crepo.UpdateCompany(company, uint(id))
 
@@ -141,7 +150,7 @@ func (ch *CompanyHandler) UpdateCompany(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Company updated successfully", "data": company})
+		&fiber.Map{"status": "success", "message": "Company info updated successfully"})
 
 }
 

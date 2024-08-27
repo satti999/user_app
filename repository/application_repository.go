@@ -18,7 +18,7 @@ func NewApplicationRepository(applicationrepo *Reposiotry) *ApplicationRepositor
 	}
 }
 
-func (repo *ApplicationRepository) ApplyJob(application model.Application) error {
+func (repo *ApplicationRepository) ApplyJob(application *model.Application) error {
 	resut := repo.CheckExistingApplication(application.UserID, application.JobID)
 	var job model.Job
 	if resut {

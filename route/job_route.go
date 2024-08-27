@@ -22,7 +22,7 @@ func (jr *JobRoute) JobRoute(router fiber.Router, app *fiber.App) {
 	router.Post("/create", jr.jobHandler.PostJob)
 	router.Get("/get/:id", jr.jobHandler.GetJobByID)
 	router.Get("/get", jr.jobHandler.GetAllJobs)
-	router.Put("/update/:id",utils.UpdateUserProfile, jr.jobHandler.UpdateJob)
+	router.Put("/update/:id",utils.UploadProfileFiles, jr.jobHandler.UpdateJob)
 	router.Delete("/delete/:id", jr.jobHandler.DeleteJob)
 	
 

@@ -24,7 +24,7 @@ func (ar *ApplicationRoute) Job_Application_Routerouter(router fiber.Router, app
 	router.Post("/create", ar.applicationHandler.ApplyForJob)
 
 	router.Get("/get", ar.applicationHandler.GetAppliedJobs)
-	router.Put("/update/:id", utils.UpdateUserProfile, ar.applicationHandler.UpdateStatus)
+	router.Put("/update/:id", utils.UploadProfileFiles, ar.applicationHandler.UpdateStatus)
 	// router.Delete("/delete/:id", ar.applicationHandler.DeleteApplication)
 
 }

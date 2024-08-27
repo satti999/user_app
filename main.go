@@ -15,7 +15,11 @@ import (
 
 func main() {
 	app := fiber.New()
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:5173", // Allow specific origin
+		AllowCredentials: true,                    // Allow credentials (cookies, authorization headers)
+	}))
+
 	config.GoogleConfig()
 	err := godotenv.Load(".env")
 	if err != nil {

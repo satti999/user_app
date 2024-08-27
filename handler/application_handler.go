@@ -29,11 +29,6 @@ func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
 			"error": "Failed to get user ID",
 		})
 	}
-	jobid, err := c.ParamsInt("id")
-
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": nil})
-	}
 
 	if err := c.BodyParser(&application); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
@@ -43,9 +38,9 @@ func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
 	}
 
 	application.UserID = userID
-	application.JobID = uint(jobid)
 
-	if err := h.arepo.ApplyJob(application); err != nil {
+	err := h.arepo.ApplyJob(&application)
+	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"status":  "fail",
 			"message": err.Error(),
@@ -55,11 +50,12 @@ func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(&fiber.Map{
 		"status":  "success",
 		"message": "Job applied successfully",
+		"data":    application,
 	})
 
 }
 
-func (h *ApplicationHandler)GetAppliedJobs(c *fiber.Ctx)error{
+func (h *ApplicationHandler) GetAppliedJobs(c *fiber.Ctx) error {
 
 	id := c.Locals("userID")
 	userID, ok := id.(uint)
@@ -77,8 +73,8 @@ func (h *ApplicationHandler)GetAppliedJobs(c *fiber.Ctx)error{
 
 }
 
-func (h *ApplicationHandler)UpdateStatus(c *fiber.Ctx)error{
-	applicationid,err:=c.ParamsInt("id")
+func (h *ApplicationHandler) UpdateStatus(c *fiber.Ctx) error {
+	applicationid, err := c.ParamsInt("id")
 
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": nil})
@@ -90,7 +86,7 @@ func (h *ApplicationHandler)UpdateStatus(c *fiber.Ctx)error{
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 	}
 
-	 err = h.arepo.UpdateStatus(string(application.Status), uint(applicationid))
+	err = h.arepo.UpdateStatus(string(application.Status), uint(applicationid))
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 	}
@@ -98,6 +94,3 @@ func (h *ApplicationHandler)UpdateStatus(c *fiber.Ctx)error{
 	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Status updated successfully", "data": application})
 
 }
-
-
-

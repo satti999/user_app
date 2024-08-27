@@ -9,7 +9,7 @@ type UseerRole string
 
 const (
 	AdminRole UseerRole = "admin"
-	UserRole  UseerRole = "user"
+	UserRole  UseerRole = "recruiter"
 	GuestRole UseerRole = "student"
 )
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -87,7 +86,8 @@ func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User has been created successfully"})
+		"message": "User has been created successfully",
+		"status":  "success"})
 
 }
 func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
@@ -202,13 +202,12 @@ func (uh *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 
 func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 
-	ide := c.Params("id")
+	userID, err := c.ParamsInt("id")
 	imagUrl := utils.GetProfileUrl()
 	resumeUrl := utils.GetResumeUrl()
 	User := model.User{}
 	Profile := model.Profile{}
 	UserReq := model.UserReq{}
-	userID, err := strconv.Atoi(ide)
 
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": err})

@@ -14,7 +14,7 @@ func NewJobRepository(jobrepo *Reposiotry) *JobRepository {
 	}
 }
 
-func (j *JobRepository) CreateJob(job model.Job) error {
+func (j *JobRepository) CreateJob(job *model.Job) error {
 
 	err := j.JobRepo.DB.Create(&job).Error
 

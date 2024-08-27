@@ -18,7 +18,7 @@ func NewUserRoute(userHandler handler.UserHandlerInterface) *UserRoute {
 }
 
 func (ur *UserRoute) UserRoute(router fiber.Router, app *fiber.App) {
-	router.Post("/create", utils.UpdateUserProfile, ur.userHandler.CreateUser)
+	router.Post("/create", utils.UploadProfileFiles, ur.userHandler.CreateUser)
 	router.Post("/login", ur.userHandler.LoginHandler)
 	router.Get("/google_login", ur.userHandler.GoogleSignin)
 	router.Get("/oauth/google/callback", ur.userHandler.GoogleCallback)
@@ -26,7 +26,7 @@ func (ur *UserRoute) UserRoute(router fiber.Router, app *fiber.App) {
 	router.Get("/get/:id", ur.userHandler.GetUserByID)
 	router.Get("/get/:email/GetUserByEmail", ur.userHandler.GetUserByEmail)
 	router.Get("/get", ur.userHandler.GetAllUsers)
-	router.Put("/update/:id", utils.UpdateUserProfile, ur.userHandler.UpdateUser)
+	router.Put("/update/:id", utils.UploadProfileFiles, ur.userHandler.UpdateUser)
 	router.Delete("/delete/:id", ur.userHandler.DeleteUser)
 	router.Get("/role/:role", ur.userHandler.GetUserByRole)
 }

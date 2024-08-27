@@ -21,7 +21,7 @@ func NewJobHandler(jrepo *repository.JobRepository) *JobHandler {
 // for admin
 func (jh *JobHandler) PostJob(c *fiber.Ctx) error {
 
-	var job model.Job
+	job := model.Job{}
 	id := c.Locals("userID")
 	userID, ok := id.(uint)
 	if !ok {
@@ -30,27 +30,28 @@ func (jh *JobHandler) PostJob(c *fiber.Ctx) error {
 			"error": "Failed to get user ID",
 		})
 	}
-	companyid, err := c.ParamsInt("id")
+	// companyid, err := c.ParamsInt("id")
 
+	// if err != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": nil})
+	// }
+
+	err := c.BodyParser(&job)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": nil})
-	}
-
-	if err := c.BodyParser(&job); err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
+			&fiber.Map{"status": "error", "message": "Error on  body parser request", "data": err})
 
 	}
 	job.CreatedByID = userID
-	job.CompanyID = uint(companyid)
+	// job.CompanyID = uint(companyid)
 
-	err = jh.jrepo.CreateJob(job)
+	err = jh.jrepo.CreateJob(&job)
 
 	if err != nil {
 
 		return c.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
+			&fiber.Map{"status": "error", "message": "Error on  job create request", "data": err})
 
 	}
 
