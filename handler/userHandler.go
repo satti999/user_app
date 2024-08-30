@@ -24,14 +24,15 @@ const (
 type UserHandlerInterface interface {
 	CreateUser(c *fiber.Ctx) error
 	LoginHandler(c *fiber.Ctx) error
+	Logout(c *fiber.Ctx) error
 	GetUserByID(c *fiber.Ctx) error
 	UpdateUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
 	GetAllUsers(c *fiber.Ctx) error
 	GetUserByRole(c *fiber.Ctx) error
-	GetUserByEmail(c *fiber.Ctx) error
 	GoogleSignin(c *fiber.Ctx) error
 	GoogleCallback(c *fiber.Ctx) error
+	UpdateUserRole(c *fiber.Ctx) error
 }
 
 type UserHandler struct {
@@ -102,11 +103,12 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 
 	}
 
-	user, err := uh.urepo.GetUserByEmail(u.Email)
+	user, err := uh.urepo.GetUserByEmail(u.Email, string(u.Role))
 
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "user not found", "data": err})
 	}
+
 	err = utils.CheckHash(user.Password, u.Password)
 	if err != nil {
 		fmt.Println(err)
@@ -123,7 +125,7 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 24),
+		Expires:  time.Now().Add(time.Hour * 2),
 		HTTPOnly: true,
 	}
 
@@ -135,6 +137,39 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 		"userId":  user.ID,
 		"role":    user.Role,
 		"email":   user.Email})
+
+}
+func (uh *UserHandler) Logout(c *fiber.Ctx) error {
+	c.ClearCookie("jwt")
+	return c.JSON(fiber.Map{"message": "logged out successfully"})
+
+}
+
+func (uh *UserHandler) UpdateUserRole(c *fiber.Ctx) error {
+	id := c.Locals("userID")
+	userID, ok := id.(uint)
+	if !ok {
+		// Handle the error case when the type assertion fails
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get user ID",
+		})
+	}
+
+	user := model.User{}
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
+	}
+
+	userRole := string(user.Role)
+
+	err := uh.urepo.UpdateUserRole(userID, userRole)
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on updating user role", "data": err})
+	}
+
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User role updated", "data": user})
 
 }
 
@@ -156,27 +191,27 @@ func (uh *UserHandler) GetUserByID(c *fiber.Ctx) error {
 
 }
 
-func (uh *UserHandler) GetUserByEmail(c *fiber.Ctx) error {
+// func (uh *UserHandler) GetUserByEmail(c *fiber.Ctx) error {
 
-	email := c.Params("email")
+// 	email := c.Params("email")
 
-	if email == "" {
+// 	if email == "" {
 
-		return c.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"status": "error", "message": "Email is required", "data": nil})
-	}
-	fmt.Println("email", email)
+// 		return c.Status(http.StatusBadRequest).JSON(
+// 			&fiber.Map{"status": "error", "message": "Email is required", "data": nil})
+// 	}
+// 	fmt.Println("email", email)
 
-	user, err := uh.urepo.GetUserByEmail(email)
+// 	user, err := uh.urepo.GetUserByEmail(email)
 
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"status": "error", "message": "Error on getting user", "data": err})
-	}
+// 	if err != nil {
+// 		return c.Status(http.StatusBadRequest).JSON(
+// 			&fiber.Map{"status": "error", "message": "Error on getting user", "data": err})
+// 	}
 
-	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User found", "data": user})
+// 	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "User found", "data": user})
 
-}
+// }
 
 func (uh *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	UserRes := model.UserResponse{}
@@ -340,8 +375,9 @@ func (uh *UserHandler) GoogleCallback(c *fiber.Ctx) error {
 	}
 	fmt.Println("User info", userInfo)
 	email := userInfo["email"].(string)
+	role := userInfo["role"].(string)
 
-	user, err := uh.urepo.GetUserByEmail(email)
+	user, err := uh.urepo.GetUserByEmail(email, role)
 
 	if err != nil || user.Email == "" {
 

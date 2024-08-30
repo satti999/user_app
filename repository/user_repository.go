@@ -18,7 +18,7 @@ func NewUserRepository(userrepo *Reposiotry) *UserRepository {
 func (ur *UserRepository) CreateUser(user model.User, profile model.Profile) error {
 	err := ur.UserRepo.DB.Create(&user).Error
 	fmt.Println("User id in repo", user.ID)
-	user_res, _ := ur.GetUserByEmail(user.Email)
+	user_res, _ := ur.GetUserByEmail(user.Email, string(user.Role))
 	profile.UserID = user_res.ID
 	perr := ur.UserRepo.DB.Create(&profile).Error
 	if err != nil || perr != nil {
@@ -49,9 +49,9 @@ func (ur *UserRepository) UserExists(email string) bool {
 	return true
 }
 
-func (ur *UserRepository) GetUserByEmail(email string) (model.User, error) {
+func (ur *UserRepository) GetUserByEmail(email string, role string) (model.User, error) {
 	var user model.User
-	err := ur.UserRepo.DB.Model(user).Preload("Profile").Where("email = ?", email).Find(&user)
+	err := ur.UserRepo.DB.Model(user).Preload("Profile").Where("email = ? AND role = ?", email, role).Find(&user)
 	if err.Error != nil {
 		return user, err.Error
 	}
@@ -89,6 +89,17 @@ func (ur *UserRepository) DeleteUser(user model.User) error {
 		return err
 	}
 	return nil
+}
+func (ur *UserRepository) UpdateUserRole(id uint, role string) error {
+
+	err := ur.UserRepo.DB.Model(model.User{}).Where("id = ?", id).Update("role", role).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (ur *UserRepository) GetUserByRole(role string) ([]model.User, error) {

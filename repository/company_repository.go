@@ -14,15 +14,15 @@ func NewCompanyRepository(companyrepo *Reposiotry) *CompanyRepository {
 	}
 }
 
-func (cr *CompanyRepository) CreateCompany(company model.Company) error {
+func (cr *CompanyRepository) CreateCompany(company *model.Company) (error, model.Company) {
 
 	err := cr.CompanyRepo.DB.Model(model.Company{}).Create(&company).Error
 
 	if err != nil {
-		return err
+		return err, *company
 	}
 
-	return nil
+	return nil, *company
 
 }
 
@@ -77,20 +77,17 @@ func (cr *CompanyRepository) DeleteCompany(company model.Company) error {
 	return nil
 
 }
-func (cr *CompanyRepository) CompanyAlreadyExist(name string) bool {
+func (cr *CompanyRepository) CompanyAlreadyExist(name string) (model.Company, error) {
 
 	var company model.Company
 
-	err := cr.CompanyRepo.DB.Model(model.Company{}).Where("name = ?", name).Find(&company).Error
+	err := cr.CompanyRepo.DB.Model(model.Company{}).Where("name = ?", name).First(&company).Error
 
 	if err != nil {
-		return false
-	}
-	if company.ID == 0 {
-		return false
+		return company, err
 	}
 
-	return true
+	return company, err
 
 }
 

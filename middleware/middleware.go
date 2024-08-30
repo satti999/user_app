@@ -20,7 +20,7 @@ func CreateToken(user model.User) (string, error) {
 			"userID":   user.ID,
 			"email":    user.Email,
 			"role":     user.Role,
-			"exp":      time.Now().Add(time.Minute * 30).Unix(),
+			"exp":      time.Now().Add(time.Minute * 45).Unix(),
 		})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
@@ -90,9 +90,9 @@ func AdminMiddleware(c *fiber.Ctx) error {
 	fmt.Println(userRole)
 	fmt.Println(userID)
 
-	if userRole != "admin" {
-		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "Access denied as only admin allowed"})
-	}
+	// if userRole != "admin" {
+	// 	return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "Access denied as only admin allowed"})
+	// }
 
 	c.Locals("userID", uint(userID))
 	return c.Next()

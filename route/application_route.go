@@ -19,7 +19,7 @@ func NewApplicationRoute(applicationHandler *handler.ApplicationHandler) *Applic
 
 func (ar *ApplicationRoute) Job_Application_Routerouter(router fiber.Router, app *fiber.App) {
 
-	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
+	app.Use(middleware.AuthMiddleware)
 
 	router.Post("/create", ar.applicationHandler.ApplyForJob)
 

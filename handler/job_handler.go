@@ -98,7 +98,7 @@ func (jh *JobHandler) GetAllJobs(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Jobs found", "data": jobs})
+		&fiber.Map{"status": "success", "message": "Jobs found", "jobs": jobs})
 
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,15 +48,18 @@ func (ch *CompanyHandler) CreateCompany(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 
 	}
-	result := ch.crepo.CompanyAlreadyExist(company.Name)
+	result, _ := ch.crepo.CompanyAlreadyExist(company.Name)
+	fmt.Println("Reqest company name", company.Name)
+	fmt.Println("Response company name", result.Name)
 
-	if result {
+	if result.Name == company.Name {
 
 		return c.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"status": "error", "message": "Can not create company on same name "})
 	}
 	company.UserID = userID
-	err = ch.crepo.CreateCompany(company)
+	err, result = ch.crepo.CreateCompany(&company)
+	fmt.Println("company id", result.ID)
 
 	if err != nil {
 
@@ -64,7 +68,7 @@ func (ch *CompanyHandler) CreateCompany(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusCreated).JSON(
-		&fiber.Map{"status": "success", "message": "Company created successfully"})
+		&fiber.Map{"status": "success", "message": "Company created successfully", "company": result, "success": true})
 
 }
 
@@ -89,7 +93,7 @@ func (ch *CompanyHandler) GetCompanyByID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Company found", "data": company})
+		&fiber.Map{"status": "success", "message": "Company found", "company": company})
 
 }
 
@@ -105,7 +109,7 @@ func (ch *CompanyHandler) GetAllCompanies(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Companies found", "data": companies})
+		&fiber.Map{"status": "success", "message": "Companies found", "companies": companies, "success": true})
 
 }
 
@@ -150,7 +154,7 @@ func (ch *CompanyHandler) UpdateCompany(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Company info updated successfully"})
+		&fiber.Map{"status": "success", "message": "Company info updated successfully", "success": true})
 
 }
 

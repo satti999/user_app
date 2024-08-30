@@ -19,7 +19,7 @@ func NewCompanyRoute(companyHandler handler.CompanyHandlerInterface) *CompanyRou
 
 func (cr *CompanyRoute) CompanyRoute(router fiber.Router, app *fiber.App) {
 
-	app.Use(middleware.AuthMiddleware, middleware.AdminMiddleware)
+	app.Use(middleware.AdminMiddleware)
 	router.Post("/register", cr.companyHandler.CreateCompany)
 	router.Get("/get/:id", cr.companyHandler.GetCompanyByID)
 	router.Get("/get", cr.companyHandler.GetAllCompanies)
