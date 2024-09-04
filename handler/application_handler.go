@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +20,7 @@ func NewApplicationHandler(aplirepo *repository.ApplicationRepository) *Applicat
 }
 
 func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
-
+	fmt.Println("user applied for job")
 	application := model.Application{}
 	id := c.Locals("userID")
 	userID, ok := id.(uint)
@@ -29,17 +30,26 @@ func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
 			"error": "Failed to get user ID",
 		})
 	}
+	jobid, err := c.ParamsInt("id")
 
-	if err := c.BodyParser(&application); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"status":  "fail",
-			"message": err.Error(),
-		})
+	if err != nil {
+
+		return c.Status(http.StatusBadRequest).JSON(
+			&fiber.Map{"status": "error", "message": "Id is invalid", "data": err})
+
 	}
 
-	application.UserID = userID
+	// if err := c.BodyParser(&application); err != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
+	// 		"status":  "fail",
+	// 		"message": err.Error(),
+	// 	})
+	// }
 
-	err := h.arepo.ApplyJob(&application)
+	application.UserID = userID
+	application.JobID = uint(jobid)
+
+	err = h.arepo.ApplyJob(&application)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"status":  "fail",
@@ -48,9 +58,10 @@ func (h *ApplicationHandler) ApplyForJob(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{
-		"status":  "success",
-		"message": "Job applied successfully",
-		"data":    application,
+		"status":      "success",
+		"message":     "Job applied successfully",
+		"application": application,
+		"success":     true,
 	})
 
 }
@@ -69,7 +80,7 @@ func (h *ApplicationHandler) GetAppliedJobs(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 	}
-	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Application found", "data": application})
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Application found", "application": application, "success": true})
 
 }
 
@@ -91,6 +102,23 @@ func (h *ApplicationHandler) UpdateStatus(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 	}
 
-	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Status updated successfully", "data": application})
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Status updated successfully", "application": application, "success": true})
+
+}
+
+func (h *ApplicationHandler) GetApplicationByID(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Id is invalid", "data": nil})
+	}
+
+	application, err := h.arepo.GetApplication(uint(id))
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(&fiber.Map{"status": "error", "message": "Error on request", "data": err})
+	}
+
+	return c.Status(http.StatusOK).JSON(&fiber.Map{"status": "success", "message": "Application found", "application": application, "success": true})
 
 }

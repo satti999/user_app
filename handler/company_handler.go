@@ -58,7 +58,7 @@ func (ch *CompanyHandler) CreateCompany(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Can not create company on same name "})
 	}
 	company.UserID = userID
-	err, result = ch.crepo.CreateCompany(&company)
+	result, err = ch.crepo.CreateCompany(&company)
 	fmt.Println("company id", result.ID)
 
 	if err != nil {
@@ -93,7 +93,7 @@ func (ch *CompanyHandler) GetCompanyByID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Company found", "company": company})
+		&fiber.Map{"status": "success", "message": "Company found", "company": company, "success": true})
 
 }
 

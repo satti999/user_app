@@ -19,3 +19,7 @@ type Company struct {
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+type CompaniesResponse struct {
+	Companies []Company `json:"companies"`
+}

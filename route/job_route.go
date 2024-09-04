@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/user_app/handler"
 	"github.com/user_app/middleware"
-	"github.com/user_app/utils"
 )
 
 type JobRoute struct {
@@ -20,11 +19,11 @@ func NewJobRoute(jobHandler *handler.JobHandler) *JobRoute {
 func (jr *JobRoute) JobRoute(router fiber.Router, app *fiber.App) {
 
 	app.Use(middleware.AdminMiddleware)
-	router.Post("/create", jr.jobHandler.PostJob)
+	router.Post("/post", jr.jobHandler.PostJob)
 	router.Get("/get/:id", jr.jobHandler.GetJobByID)
 	router.Get("/get", jr.jobHandler.GetAllJobs)
-	router.Get("/get/getadminjobs", jr.jobHandler.GetAdminJobs)
-	router.Put("/update/:id", utils.UploadProfileFiles, jr.jobHandler.UpdateJob)
+	router.Get("/getadminjobs", jr.jobHandler.GetAdminJobs)
+	router.Put("/update/:id", jr.jobHandler.UpdateJob)
 	router.Delete("/delete/:id", jr.jobHandler.DeleteJob)
 
 }

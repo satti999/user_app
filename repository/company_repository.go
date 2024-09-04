@@ -14,15 +14,15 @@ func NewCompanyRepository(companyrepo *Reposiotry) *CompanyRepository {
 	}
 }
 
-func (cr *CompanyRepository) CreateCompany(company *model.Company) (error, model.Company) {
+func (cr *CompanyRepository) CreateCompany(company *model.Company) (model.Company, error) {
 
 	err := cr.CompanyRepo.DB.Model(model.Company{}).Create(&company).Error
 
 	if err != nil {
-		return err, *company
+		return *company, err
 	}
 
-	return nil, *company
+	return *company, nil
 
 }
 

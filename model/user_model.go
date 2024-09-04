@@ -1,7 +1,8 @@
 package model
 
 import (
-	"github.com/lib/pq"
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -15,10 +16,10 @@ const (
 
 type Profile struct {
 	gorm.Model
-	Bio                string         `json:"bio"`
-	Skills             pq.StringArray `gorm:"type:text[]" json:"skills"`
-	Resume             string         `json:"resume"`
-	ResumeOriginalName string         `json:"resumeOriginalName"`
+	Bio                string `json:"bio"`
+	Skills             string `gorm:"not null" json:"skills"`
+	Resume             string `json:"resume"`
+	ResumeOriginalName string `json:"resumeOriginalName"`
 	//CompanyID          uint     `json:"companyId"`
 	ProfilePhoto string `json:"profilePhoto"`
 	UserEmail    string `gorm:"not null"`
@@ -26,16 +27,22 @@ type Profile struct {
 }
 
 type User struct {
-	gorm.Model
-	Name     string    `json:"name"`
-	Role     UseerRole `json:"role"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
-	Profile  Profile   `gorm:"foreignKey:UserID" json:"profile"`
+	ID            uint      `gorm:"primaryKey" json:"userId"`
+	Name          string    `json:"name"`
+	Role          UseerRole `json:"role"`
+	Email         string    `json:"email"`
+	PhoneNumber   string    `json:"phoneNumber"`
+	ApplicationID uint      `json:"applicationId"`
+	Password      string    `json:"password"`
+	Profile       Profile   `gorm:"foreignKey:UserID" json:"profile"`
 	//CompanyID   uint      `json:"companyId"`
-	Application Application `gorm:"foreignKey:UserID"`
-	Company     Company     `gorm:"foreignKey:UserID"`
-	Job         Job         `gorm:"foreignKey:CreatedByID"`
+	//Application Application    `gorm:"foreignKey:UserID"`
+	Company      Company        `gorm:"foreignKey:UserID"`
+	Job          Job            `gorm:"foreignKey:CreatedByID"`
+	Applications []Application  `gorm:"foreignKey:UserID" json:"applications"`
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    time.Time      `json:"updatedAt"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type UserReq struct {
 	Name               string    `json:"name"`
@@ -43,7 +50,7 @@ type UserReq struct {
 	Email              string    `json:"email"`
 	Password           string    `json:"password"`
 	Bio                string    `json:"bio"`
-	Skills             []string  ` json:"skills"`
+	Skills             string    ` json:"skills"`
 	Resume             string    `json:"resume"`
 	ResumeOriginalName string    `json:"resumeOriginalName"`
 	ProfilePhoto       string    `json:"profilePhoto"`
@@ -53,7 +60,7 @@ type UserResponse struct {
 	Role               UseerRole `json:"role"`
 	Email              string    `json:"email"`
 	Bio                string    `json:"bio"`
-	Skills             []string  ` json:"skills"`
+	Skills             string    ` json:"skills"`
 	Resume             string    `json:"resume"`
 	ResumeOriginalName string    `json:"resumeOriginalName"`
 	ProfilePhoto       string    `json:"profilePhoto"`

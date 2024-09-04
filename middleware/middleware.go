@@ -20,7 +20,7 @@ func CreateToken(user model.User) (string, error) {
 			"userID":   user.ID,
 			"email":    user.Email,
 			"role":     user.Role,
-			"exp":      time.Now().Add(time.Minute * 45).Unix(),
+			"exp":      time.Now().Add(time.Hour * 45).Unix(),
 		})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))

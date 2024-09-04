@@ -46,7 +46,7 @@ func (repo *ApplicationRepository) GetAppliedJobs(id uint) ([]model.Application,
 
 	var applications []model.Application
 
-	err := repo.ApplicationRepo.DB.Model(model.Application{}).Where("user_id = ? ", id).Find(&applications).Error
+	err := repo.ApplicationRepo.DB.Model(model.Application{}).Preload("Applicant").Where("user_id = ? ", id).Find(&applications).Error
 
 	if err != nil {
 
@@ -82,5 +82,19 @@ func (repo *ApplicationRepository) UpdateStatus(status string, id uint) error {
 		return err
 	}
 	return nil
+
+}
+
+func (repo *ApplicationRepository) GetApplication(id uint) ([]model.Application, error) {
+	applica := []model.Application{}
+
+	err := repo.ApplicationRepo.DB.Model(model.Application{}).Preload("User").Preload("User.Profile").Where("job_id = ?", id).Find(&applica).Error
+
+	if err != nil {
+		return []model.Application{}, err
+
+	}
+
+	return applica, nil
 
 }

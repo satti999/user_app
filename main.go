@@ -39,7 +39,7 @@ func main() {
 
 	route.MainRoute(app, db)
 
-	err = app.Listen(":8080")
+	err = app.Listen("127.0.0.1:8080")
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}

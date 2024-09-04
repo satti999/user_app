@@ -3,7 +3,6 @@ package model
 import (
 	"time"
 
-	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +10,7 @@ type Job struct {
 	ID              uint           `gorm:"primaryKey" json:"jobId"`
 	Title           string         `gorm:"not null" json:"title"`
 	Description     string         `gorm:"not null" json:"description"`
-	Requirements    pq.StringArray `gorm:"type:text[]" json:"requirements"` // Array of strings for requirements
+	Requirements    string         `gorm:"not nill" json:"requirements"` // Array of strings for requirements
 	Salary          int            `gorm:"not null" json:"salary"`
 	ExperienceLevel int            `gorm:"not null" json:"experienceLevel"`
 	Location        string         `gorm:"not null" json:"location"`

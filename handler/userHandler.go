@@ -125,7 +125,7 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 2),
+		Expires:  time.Now().Add(time.Hour * 45),
 		HTTPOnly: true,
 	}
 
@@ -135,8 +135,11 @@ func (uh *UserHandler) LoginHandler(c *fiber.Ctx) error {
 		"message": "User logged in",
 		"data":    token,
 		"userId":  user.ID,
+		"success": true,
 		"role":    user.Role,
-		"email":   user.Email})
+		"email":   user.Email,
+		"user":    user,
+	})
 
 }
 func (uh *UserHandler) Logout(c *fiber.Ctx) error {

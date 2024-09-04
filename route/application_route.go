@@ -21,10 +21,11 @@ func (ar *ApplicationRoute) Job_Application_Routerouter(router fiber.Router, app
 
 	app.Use(middleware.AuthMiddleware)
 
-	router.Post("/create", ar.applicationHandler.ApplyForJob)
+	router.Get("/create/:id", ar.applicationHandler.ApplyForJob)
 
 	router.Get("/get", ar.applicationHandler.GetAppliedJobs)
 	router.Put("/update/:id", utils.UploadProfileFiles, ar.applicationHandler.UpdateStatus)
+	router.Get("/:id/applicants", ar.applicationHandler.GetApplicationByID)
 	// router.Delete("/delete/:id", ar.applicationHandler.DeleteApplication)
 
 }

@@ -109,7 +109,7 @@ func (j *JobRepository) GetAdminJobs(uid uint) ([]model.Job, error) {
 
 	var jobs []model.Job
 
-	err := j.JobRepo.DB.Model(model.Job{}).Preload("Company").Where("created_by = ?", uid).Order("created_at DESC").Find(&jobs).Error
+	err := j.JobRepo.DB.Model(model.Job{}).Preload("Company").Where("created_by_id = ?", uid).Order("created_at DESC").Find(&jobs).Error
 
 	if err != nil {
 		return nil, err
