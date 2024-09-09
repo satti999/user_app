@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/user_app/model"
+	"gorm.io/gorm"
 )
 
 type JobRepository struct {
@@ -44,7 +45,11 @@ func (j *JobRepository) GetAllJobs(keyword string) ([]model.Job, error) {
 func (j *JobRepository) GetJobByID(id uint) (model.Job, error) {
 	var job model.Job
 
-	err := j.JobRepo.DB.Model(model.Job{}).Preload("Applications").Where("id = ?", id).Find(&job).Error
+	// err := j.JobRepo.DB.Model(model.Job{}).Preload("Applications").Where("id = ?", id).Find(&job).Error
+	err := j.JobRepo.DB.Model(model.Job{}).
+		Preload("Applications", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, job_id, user_id, status")
+		}).Where("id = ?", id).Find(&job).Error
 
 	if err != nil {
 		return model.Job{}, err

@@ -37,16 +37,24 @@ func (ur *UserRepository) GetUserByID(id uint) (model.User, error) {
 
 }
 
-func (ur *UserRepository) UserExists(email string) bool {
+func (ur *UserRepository) UserExists(email string, role string) bool {
 	var user model.User
-	err := ur.UserRepo.DB.Model(user).Where("email = ?", email).Find(&user).Error
+	err := ur.UserRepo.DB.Model(user).Where("email = ? AND role = ?", email, role).Find(&user).Error
+	fmt.Println("user exists repo error", err, email, role)
+	fmt.Println("user exists repo response", user.Email, user.Role)
+
+	if email == user.Email && role == string(user.Role) {
+		fmt.Println("user exists repo .................")
+		return true
+
+	}
 	if err != nil {
+
 		return false
 	}
-	if user.ID == 0 {
-		return false
-	}
-	return true
+
+	return false
+
 }
 
 func (ur *UserRepository) GetUserByEmail(email string, role string) (model.User, error) {
@@ -73,7 +81,7 @@ func (ur *UserRepository) UpdateUser(user model.User, profile model.Profile, id 
 	user.ID = id
 	Profile := model.Profile{}
 
-	err := ur.UserRepo.DB.Model(User).Where("id = ?", id).Updates(user).Error
+	err := ur.UserRepo.DB.Model(User).Where("id = ?", id).Updates(&user).Error
 	perr := ur.UserRepo.DB.Model(Profile).Where("user_id", id).Updates(profile).Error
 
 	if err != nil || perr != nil {

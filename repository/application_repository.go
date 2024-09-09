@@ -46,7 +46,7 @@ func (repo *ApplicationRepository) GetAppliedJobs(id uint) ([]model.Application,
 
 	var applications []model.Application
 
-	err := repo.ApplicationRepo.DB.Model(model.Application{}).Preload("Applicant").Where("user_id = ? ", id).Find(&applications).Error
+	err := repo.ApplicationRepo.DB.Model(model.Application{}).Preload("Job").Preload("Job.Company").Where("user_id = ? ", id).Find(&applications).Error
 
 	if err != nil {
 

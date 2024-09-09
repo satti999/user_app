@@ -89,9 +89,45 @@ func (jh *JobHandler) GetJobByID(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Job not found", "data": err})
 
 	}
+	jobResponse := model.JobWithApplications{}
+	jobApplication := model.ApplicationData{}
+	jobResponse.JobID = job.ID
+
+	jobResponse.Title = job.Title
+
+	jobResponse.Description = job.Description
+
+	jobResponse.Requirements = job.Requirements
+
+	jobResponse.Salary = job.Salary
+
+	jobResponse.ExperienceLevel = job.ExperienceLevel
+
+	jobResponse.Location = job.Location
+
+	jobResponse.JobType = job.JobType
+
+	jobResponse.Position = job.Position
+
+	jobResponse.CreatedByID = job.CreatedByID
+
+	jobResponse.CreatedAt = job.CreatedAt
+
+	jobResponse.UpdatedAt = job.UpdatedAt
+
+	// jobResponse.Applications=job.Applications
+	for _, application := range job.Applications {
+		jobApplication.ID = application.ID
+		jobApplication.JobID = application.JobID
+		jobApplication.UserID = application.UserID
+		jobApplication.Status = string(application.Status)
+
+		jobResponse.Applications = append(jobResponse.Applications, jobApplication)
+
+	}
 
 	return c.Status(http.StatusOK).JSON(
-		&fiber.Map{"status": "success", "message": "Job found", "job": job, "success": true})
+		&fiber.Map{"status": "success", "message": "Job found", "job": jobResponse, "success": true})
 
 }
 

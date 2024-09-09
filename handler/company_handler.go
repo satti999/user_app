@@ -140,7 +140,7 @@ func (ch *CompanyHandler) UpdateCompany(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 
 	}
-
+	fmt.Println("image url of logo ,in company", imagUrl)
 	company.Logo = imagUrl
 	company.UserID = userID
 

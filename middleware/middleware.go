@@ -31,25 +31,25 @@ func CreateToken(user model.User) (string, error) {
 	return tokenString, nil
 }
 
-func AuthMiddleware(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
-	if cookie == "" {
-		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
-	}
-	// if authHeader == "" {
-	// 	return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
-	// }
-	//tokenString := cookie[len(""):]
-	//fmt.Println("token String", tokenString)
-	_, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
-	if err != nil {
-		return err
-	}
+// func AuthMiddleware(c *fiber.Ctx) error {
+// 	cookie := c.Cookies("jwt")
+// 	if cookie == "" {
+// 		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
+// 	}
+// 	// if authHeader == "" {
+// 	// 	return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{"error": "missing token"})
+// 	// }
+// 	//tokenString := cookie[len(""):]
+// 	//fmt.Println("token String", tokenString)
+// 	_, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+// 		return []byte(os.Getenv("JWT_SECRET")), nil
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return c.Next()
-}
+// 	return c.Next()
+// }
 
 func AdminMiddleware(c *fiber.Ctx) error {
 
@@ -69,14 +69,6 @@ func AdminMiddleware(c *fiber.Ctx) error {
 		return err
 	}
 
-	// var userID float64
-	// for key, value := range claims {
-	// 	if key == "userID" {
-	// 		userID = value.(float64)
-	// 	}
-	// 	fmt.Printf("%s: %v\n", key, value)
-
-	// }
 	userID, uok := claims["userID"].(float64)
 	if !uok {
 		fmt.Println("Couldn't parse id as int", uok)

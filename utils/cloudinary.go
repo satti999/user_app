@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
@@ -16,6 +17,7 @@ import (
 
 var image_url string
 var resume_url string
+var file_name string
 
 func generateRandomString() string {
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -42,9 +44,10 @@ func UploadFileToCloudinary(cld *cloudinary.Cloudinary, file multipart.File, fol
 	if err != nil {
 		return "", fmt.Errorf("upload error: %v", err)
 	}
+	fmt.Println("upload file response", uploadResult.OriginalFilename)
 	return uploadResult.SecureURL, nil
 }
-func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string) (string, error) {
+func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string, num int) (string, error) {
 	file, err := c.FormFile(fieldName)
 	if err != nil {
 		return "", nil // No file uploaded
@@ -68,6 +71,9 @@ func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string) (string, er
 			return "", fmt.Errorf("failed to open file: %s", err)
 		}
 		defer tempFile.Close()
+		if num == 1 {
+			file_name = file.Filename
+		}
 
 		ext := filepath.Ext(file.Filename)
 		filename := fmt.Sprintf("%s-%s%s", folder, generateRandomString(), ext)
@@ -92,70 +98,44 @@ func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string) (string, er
 
 	return "", nil
 }
-func UploadProfileFiles(c *fiber.Ctx) error {
-
-	fmt.Println("************* UploadProfileFiles  ************")
+func UploadImage(c *fiber.Ctx) error {
+	fmt.Println("image called in cloudinary")
 	pfile, err := c.FormFile("image")
-	fmt.Println("User in image function")
+
 	if pfile == nil && err != nil {
-		rfile, err := c.FormFile("resume")
-		if rfile == nil && err != nil {
-			c.Next()
-		} else {
-			imageURL, err := HandleFileUpload(c, "image", "images")
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload image: %s", err))
-
-			}
-			image_url = imageURL
-			return c.Next()
-		}
-
-	}
-	rfile, err := c.FormFile("resume")
-	fmt.Println("User in resume function")
-	if rfile == nil && err != nil {
-		pfile, err := c.FormFile("image")
-		if pfile == nil && err != nil {
-			c.Next()
-		} else {
-			imageURL, err := HandleFileUpload(c, "image", "images")
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload image: %s", err))
-
-			}
-			image_url = imageURL
-			return c.Next()
-		}
-	}
-
-	if pfile != nil && rfile != nil {
-		fmt.Println("User in resume and image function function")
-		imageURL, err := HandleFileUpload(c, "image", "images")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload image: %s", err))
-		}
-		image_url = imageURL
-		resumeURL, err := HandleFileUpload(c, "resume", "resumes")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload resume: %s", err))
-		}
-		resume_url = resumeURL
-
-		// Set the URLs in the context or return them as part of the response
-		fmt.Println("Image URL:", image_url)
-		fmt.Println("Resume URL:", resume_url)
+		fmt.Println("image url------- in upload image")
 		return c.Next()
 	}
+
+	imageURL, err := HandleFileUpload(c, "image", "images", 0)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload image: %s", err))
+
+	}
+
+	image_url = imageURL
+
 	return c.Next()
 
 }
-func UpdateUserProfile(c *fiber.Ctx) error {
+func UploadResume(c *fiber.Ctx) error {
 
-	err := UploadProfileFiles(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to upload files")
+	rfile, err := c.FormFile("resume")
+
+	if rfile == nil && err != nil {
+		return c.Next()
 	}
+
+	resumeURL, err := HandleFileUpload(c, "resume", "resumes", 1)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("failed to upload image: %s", err))
+
+	}
+
+	resume_url = resumeURL
+
 	return c.Next()
 }
 
@@ -165,4 +145,8 @@ func GetProfileUrl() string {
 
 func GetResumeUrl() string {
 	return resume_url
+}
+func GetFileName() string {
+	baseName := strings.Split(file_name, ".")[0]
+	return baseName
 }

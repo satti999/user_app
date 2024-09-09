@@ -19,12 +19,12 @@ func NewApplicationRoute(applicationHandler *handler.ApplicationHandler) *Applic
 
 func (ar *ApplicationRoute) Job_Application_Routerouter(router fiber.Router, app *fiber.App) {
 
-	app.Use(middleware.AuthMiddleware)
+	app.Use(middleware.AdminMiddleware)
 
 	router.Get("/create/:id", ar.applicationHandler.ApplyForJob)
 
 	router.Get("/get", ar.applicationHandler.GetAppliedJobs)
-	router.Put("/update/:id", utils.UploadProfileFiles, ar.applicationHandler.UpdateStatus)
+	router.Put("/update/:id", utils.UploadResume, ar.applicationHandler.UpdateStatus)
 	router.Get("/:id/applicants", ar.applicationHandler.GetApplicationByID)
 	// router.Delete("/delete/:id", ar.applicationHandler.DeleteApplication)
 

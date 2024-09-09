@@ -23,7 +23,7 @@ func (cr *CompanyRoute) CompanyRoute(router fiber.Router, app *fiber.App) {
 	router.Post("/register", cr.companyHandler.CreateCompany)
 	router.Get("/get/:id", cr.companyHandler.GetCompanyByID)
 	router.Get("/get", cr.companyHandler.GetAllCompanies)
-	router.Put("/update/:id", utils.UploadProfileFiles, cr.companyHandler.UpdateCompany)
+	router.Put("/update/:id", utils.UploadImage, cr.companyHandler.UpdateCompany)
 	router.Delete("/delete/:id", cr.companyHandler.DeleteCompany)
 	router.Get("/get/:name", cr.companyHandler.GetCompanyByName)
 
