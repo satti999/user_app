@@ -45,21 +45,23 @@ type User struct {
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type UserReq struct {
-	Name               string    `json:"name"`
-	Role               UseerRole `json:"role"`
-	Email              string    `json:"email"`
-	Password           string    `json:"password"`
-	Bio                string    `json:"bio"`
-	Skills             string    ` json:"skills"`
-	Resume             string    `json:"resume"`
-	ResumeOriginalName string    `json:"resumeOriginalName"`
-	ProfilePhoto       string    `json:"profilePhoto"`
+	Name        string    `json:"name"`
+	Role        UseerRole `json:"role"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phoneNumber"`
+	Password    string    `json:"password"`
+	Bio         string    `json:"bio"`
+	Skills      string    ` json:"skills"`
+	// Resume             string    `json:"resume"`
+	// ResumeOriginalName string    `json:"resumeOriginalName"`
+	// ProfilePhoto       string    `json:"profilePhoto"`
 }
 type UserResponse struct {
 	Name               string    `json:"name"`
 	Role               UseerRole `json:"role"`
 	Email              string    `json:"email"`
 	Bio                string    `json:"bio"`
+	PhoneNumber        string    `json:"phoneNumber"`
 	Skills             string    ` json:"skills"`
 	Resume             string    `json:"resume"`
 	ResumeOriginalName string    `json:"resumeOriginalName"`

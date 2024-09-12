@@ -81,7 +81,10 @@ func (ur *UserRepository) UpdateUser(user model.User, profile model.Profile, id 
 	user.ID = id
 	Profile := model.Profile{}
 
-	err := ur.UserRepo.DB.Model(User).Where("id = ?", id).Updates(&user).Error
+	profile.UserID = id
+	// user.Profile = profile
+
+	err := ur.UserRepo.DB.Model(User).Where("id = ?", id).Updates(user).Error
 	perr := ur.UserRepo.DB.Model(Profile).Where("user_id", id).Updates(profile).Error
 
 	if err != nil || perr != nil {

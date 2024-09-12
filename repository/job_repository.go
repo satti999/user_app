@@ -44,8 +44,6 @@ func (j *JobRepository) GetAllJobs(keyword string) ([]model.Job, error) {
 // for student
 func (j *JobRepository) GetJobByID(id uint) (model.Job, error) {
 	var job model.Job
-
-	// err := j.JobRepo.DB.Model(model.Job{}).Preload("Applications").Where("id = ?", id).Find(&job).Error
 	err := j.JobRepo.DB.Model(model.Job{}).
 		Preload("Applications", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id, job_id, user_id, status")
@@ -123,3 +121,5 @@ func (j *JobRepository) GetAdminJobs(uid uint) ([]model.Job, error) {
 	return jobs, nil
 
 }
+
+

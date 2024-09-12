@@ -42,7 +42,7 @@ type JobWithApplications struct {
 	JobType         string            `json:"jobType"`
 	Position        int               `json:"position"`
 	CreatedByID     uint              `json:"createdBy"`
-	Applications    []ApplicationData `json:"applications"`
+	Applications    []ApplicationData `gorm:"foreignKey:JobID" json:"applications"`
 	CreatedAt       time.Time         `json:"createdAt"`
 	UpdatedAt       time.Time         `json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt    `gorm:"index" json:"-"`

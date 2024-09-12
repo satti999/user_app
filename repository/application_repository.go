@@ -19,14 +19,14 @@ func NewApplicationRepository(applicationrepo *Reposiotry) *ApplicationRepositor
 }
 
 func (repo *ApplicationRepository) ApplyJob(application *model.Application) error {
-	resut := repo.CheckExistingApplication(application.UserID, application.JobID)
+	result := repo.CheckExistingApplication(application.UserID, application.JobID)
 	var job model.Job
-	if resut {
+	if result {
 		return errors.New("you have already applied for this job")
 	}
-	result := repo.ApplicationRepo.DB.First(&job, application.JobID)
+	res := repo.ApplicationRepo.DB.First(&job, application.JobID)
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		// Return a custom error message if the job is not found
 		return fmt.Errorf("job with ID %d not found", application.JobID)
 	}
@@ -47,7 +47,7 @@ func (repo *ApplicationRepository) GetAppliedJobs(id uint) ([]model.Application,
 	var applications []model.Application
 
 	err := repo.ApplicationRepo.DB.Model(model.Application{}).Preload("Job").Preload("Job.Company").Where("user_id = ? ", id).Find(&applications).Error
-
+     
 	if err != nil {
 
 		return nil, err

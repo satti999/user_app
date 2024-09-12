@@ -223,3 +223,5 @@ func (j *JobHandler) GetAdminJobs(c *fiber.Ctx) error {
 		&fiber.Map{"status": "success", "message": "Jobs found", "jobs": jobs, "success": true})
 
 }
+
+

@@ -72,7 +72,6 @@ func (uh *UserHandler) CreateUser(c *fiber.Ctx) error {
 	Profile.UserEmail = UserReq.Email
 	Profile.Bio = UserReq.Bio
 	Profile.Skills = UserReq.Skills
-	Profile.Resume = UserReq.Resume
 	Profile.ResumeOriginalName = file_name
 	Profile.ProfilePhoto = imagUrl
 	pass := User.Password
@@ -238,11 +237,12 @@ func (uh *UserHandler) UpdateUser(c *fiber.Ctx) error {
 			&fiber.Map{"status": "error", "message": "Error on request", "data": err})
 
 	}
-	fmt.Println("User skills are", UserReq.Skills)
-	fmt.Printf("%T\n", UserReq.Skills)
+	fmt.Println("User skills are", UserReq.Password)
+
 	User.Name = UserReq.Name
 	User.Email = UserReq.Email
 	User.Password = UserReq.Password
+	User.PhoneNumber = UserReq.PhoneNumber
 	Profile.Bio = UserReq.Bio
 	Profile.Skills = UserReq.Skills
 	Profile.Resume = resumeUrl

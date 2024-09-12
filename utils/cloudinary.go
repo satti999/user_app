@@ -35,17 +35,32 @@ func Credentials() *cloudinary.Cloudinary {
 	return cld
 }
 
-func UploadFileToCloudinary(cld *cloudinary.Cloudinary, file multipart.File, folder string) (string, error) {
+func UploadFileToCloudinary(cld *cloudinary.Cloudinary, file multipart.File, folder string, num int) (string, error) {
 	ctx := context.Background()
+	if num == 0 {
+		uploadParams := uploader.UploadParams{
+			Folder: folder, // Use the provided folder name
+		}
+		uploadResult, err := cld.Upload.Upload(ctx, file, uploadParams)
+		if err != nil {
+			return "", fmt.Errorf("upload error: %v", err)
+		}
+		fmt.Println("upload image response", uploadResult.OriginalFilename)
+		return uploadResult.SecureURL, nil
+	}
 	uploadParams := uploader.UploadParams{
-		Folder: folder, // Use the provided folder name
+		Folder:       folder, // Use the provided folder name
+		ResourceType: "raw",
+		Format:       "pdf",
 	}
 	uploadResult, err := cld.Upload.Upload(ctx, file, uploadParams)
 	if err != nil {
 		return "", fmt.Errorf("upload error: %v", err)
 	}
-	fmt.Println("upload file response", uploadResult.OriginalFilename)
+	fmt.Println("upload resume file response", uploadResult.OriginalFilename)
+	fmt.Println("resume fie url ", uploadResult.SecureURL)
 	return uploadResult.SecureURL, nil
+
 }
 func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string, num int) (string, error) {
 	file, err := c.FormFile(fieldName)
@@ -85,7 +100,7 @@ func HandleFileUpload(c *fiber.Ctx, fieldName string, folder string, num int) (s
 		}
 
 		// Upload to Cloudinary
-		url, err := UploadFileToCloudinary(cld, tempFile, folder)
+		url, err := UploadFileToCloudinary(cld, tempFile, folder, num)
 		if err != nil {
 			return "", err
 		}

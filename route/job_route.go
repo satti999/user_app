@@ -21,6 +21,7 @@ func (jr *JobRoute) JobRoute(router fiber.Router, app *fiber.App) {
 	app.Use(middleware.AdminMiddleware)
 	router.Post("/post", jr.jobHandler.PostJob)
 	router.Get("/get/:id", jr.jobHandler.GetJobByID)
+	
 	router.Get("/get", jr.jobHandler.GetAllJobs)
 	router.Get("/getadminjobs", jr.jobHandler.GetAdminJobs)
 	router.Put("/update/:id", jr.jobHandler.UpdateJob)
